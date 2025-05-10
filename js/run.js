@@ -32,7 +32,10 @@ async function runWorkers() {
   ]);
 
   console.log('Attempting safe run');
-  // スタックサイズはデフォルトで1MBであるため、それ以下のスタックポインタは問題ない
+  // The default stack size in Rust WASM is 1MB (0x100000).
+  // By assigning distinct stack pointers within this space, we avoid collision.
+  // For example, one worker's stack starts at 1MB, the other's at 512KB (0x50000).
+  // Each pointer decrements as grows.
   await Promise.all([
     launchWorker(0x100000),
     launchWorker(0x50000),
