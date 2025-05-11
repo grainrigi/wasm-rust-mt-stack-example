@@ -1,5 +1,13 @@
 # Rust WASM Multithreaded Stack Collision Example
 
+## Update (2025-05-11):
+
+The phenomenon explained below will not occur if you are using [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen).
+This is because [wasm-bindgen/threads-xform injects certain logic into the __wbindgen_start](https://github.com/rustwasm/wasm-bindgen/blob/c35cc9369d5e0dc418986f7811a0dd702fb33ef9/crates/threads-xform/src/lib.rs#L286-L323) which allocates a dedicated stack for each additionally launched thread. (The first thread uses the default stack pointer.)
+Therefore, it is recommended to launch your WASM module using the `init` (or `initSync`) function provided by `wasm-bindgen`.
+
+## Overview
+
 In Rust, even when built with atomics (shared-memory) enabled, the value of `$__stack_pointer` defaults to the same as the stack-size. Since this is initialized by a constant, it's possible for the same region of stack memory to be read and written simultaneously across multiple WASM instances.
 
 This sample demonstrates the phenomenon where stacks corrupt each other when running the binary concurrently with no countermeasures taken.
